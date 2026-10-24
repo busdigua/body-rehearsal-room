@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#eeeae1" />
+  <title>身体排练室 — 把训练，排成一场好戏</title>
+  <style>
+    :root {
+      --paper: #eeeae1;
+      --paper-deep: #e2ddd2;
+      --ink: #20211f;
+      --muted: #797a73;
+      --stage: #171a19;
+      --stage-2: #232522;
+      --line: rgba(35, 36, 32, .14);
+      --accent: #ee7051;
+      --accent-soft: #f8dfd2;
+      --gold: #f0bd70;
+      --cream: #f7f3eb;
+      --green: #a9bf9d;
+      --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+      --sans: Inter, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+      --shadow: 0 24px 80px rgba(32, 31, 27, .12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible { outline: 3px solid rgba(238,112,81,.55); outline-offset: 3px; }
+    .shell { width: min(1240px, calc(100% - 64px)); margin: 0 auto; }
+    .topbar { height: 88px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; position: relative; border: 1px solid var(--ink); border-radius: 50%; }
+    .brand-mark:before, .brand-mark:after { content: ''; position: absolute; background: var(--accent); border-radius: 10px; }
+    .brand-mark:before { height: 13px; width: 3px; transform: rotate(38deg); }
+    .brand-mark:after { height: 3px; width: 13px; transform: translate(2px, 4px) rotate(-25deg); background: var(--ink); }
+    .brand-name { font-size: 15px; font-weight: 800; letter-spacing: -.04em; }
+    .brand-sub { color: var(--muted); font: 10px var(--mono); letter-spacing: .13em; margin-top: 3px; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .edition { color: var(--muted); font: 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding-right: 14px; border-right: 1px solid var(--line); }
+    .theme-select { position: relative; }
+    .theme-trigger { border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 10px 13px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; gap: 9px; align-items: center; transition: .2s ease; }
+    .theme-trigger:hover { background: rgba(255,255,255,.45); }
+    .theme-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .theme-menu { display: none; position: absolute; z-index: 5; right: 0; top: calc(100% + 9px); min-width: 175px; padding: 7px; background: #fffdf8; border: 1px solid var(--line); border-radius: 13px; box-shadow: var(--shadow); }
+    .theme-menu.open { display: block; animation: pop .16s ease-out; }
+    .theme-option { width: 100%; border: 0; background: transparent; border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 10px; text-align: left; font-size: 12px; cursor: pointer; }
+    .theme-option:hover, .theme-option.selected { background: #f1ede4; }
+    .theme-swatch { width: 16px; height: 16px; border-radius: 50%; background: var(--swatch); border: 2px solid rgba(0,0,0,.08); }
+    .theme-option small { color: var(--muted); margin-left: auto; font: 9px var(--mono); }
+
+    .hero { background: var(--stage); color: var(--cream); position: relative; min-height: 478px; overflow: hidden; border-radius: 8px; isolation: isolate; box-shadow: 0 28px 70px rgba(28,28,24,.16); }
+    .hero:before { content: ''; position: absolute; inset: 0; z-index: -2; background: radial-gradient(ellipse at 72% 23%, rgba(221,112,77,.22), transparent 32%), radial-gradient(ellipse at 88% 90%, rgba(224,165,89,.14), transparent 29%), linear-gradient(120deg, #191c1b 8%, #242622 57%, #24211e); }
+    .hero:after { content: ''; position: absolute; z-index: -1; inset: 0; opacity: .14; background-image: radial-gradient(rgba(255,255,255,.55) .6px, transparent .7px); background-size: 5px 5px; mask-image: linear-gradient(90deg, transparent, black); pointer-events: none; }
+    .hero-grid { min-height: 478px; display: grid; grid-template-columns: 1.02fr .98fr; align-items: center; position: relative; }
+    .hero-copy { padding: 58px 20px 58px 72px; position: relative; z-index: 2; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 10px; color: #c9c1b3; font: 10px var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+    .eyebrow:before { content: ''; width: 25px; height: 1px; background: var(--accent); }
+    .hero h1 { font-size: clamp(39px, 5.1vw, 68px); line-height: 1.15; letter-spacing: -.075em; margin: 22px 0 16px; font-weight: 800; }
+    .hero h1 span { color: var(--gold); font-family: Georgia, serif; font-weight: 500; font-style: italic; letter-spacing: -.055em; }
+    .hero-lede { max-width: 370px; color: #c3c1b7; font-size: 14px; line-height: 1.9; margin: 0; }
+    .hero-buttons { display: flex; align-items: center; gap: 12px; margin-top: 29px; flex-wrap: wrap; }
+    .btn { border: 0; border-radius: 4px; padding: 14px 20px; min-height: 48px; font-size: 12px; font-weight: 800; letter-spacing: .02em; display: inline-flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer; transition: transform .18s ease, filter .18s ease, background .18s ease; }
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: var(--accent); color: #211c18; box-shadow: 0 7px 22px rgba(238,112,81,.18); }
+    .btn-ghost { color: var(--cream); background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); }
+    .btn-light { background: var(--cream); color: var(--ink); }
+    .btn-line { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    .btn-small { min-height: 36px; padding: 8px 12px; font-size: 11px; }
+    .btn svg, .icon-btn svg { width: 15px; height: 15px; }
+    .hero-footnote { margin-top: 24px; color: #9e9c93; font-size: 10px; display: flex; align-items: center; gap: 7px; }
+    .hero-footnote span { color: var(--gold); }
+    .stage-art { height: 100%; min-height: 478px; position: relative; display: grid; place-items: center; overflow: hidden; }
+    .stage-art:before { content: ''; position: absolute; width: 450px; height: 410px; top: -50px; right: 4%; opacity: .43; background: conic-gradient(from 173deg at 50% 3%, transparent 0deg, rgba(242,185,110,.15) 18deg, transparent 32deg, transparent 60deg, rgba(242,185,110,.12) 77deg, transparent 93deg); filter: blur(8px); }
+    .curtain-edge { position: absolute; right: 0; top: 0; bottom: 0; width: 28px; opacity: .75; background: repeating-linear-gradient(90deg, #311f1d 0 7px, #522a25 8px 11px, #281c1c 12px 18px); box-shadow: -14px 0 20px rgba(0,0,0,.2); }
+    .stage-frame { position: relative; width: min(100%, 520px); height: 410px; display: grid; place-items: center; margin-right: 12px; }
+    .halo { position: absolute; width: 330px; height: 330px; border-radius: 50%; border: 1px solid rgba(240,189,112,.17); box-shadow: 0 0 0 32px rgba(240,189,112,.025), 0 0 0 64px rgba(240,189,112,.02), inset 0 0 80px rgba(238,112,81,.09); }
+    .spotlight { position: absolute; width: 310px; height: 240px; left: 50%; top: 24px; transform: translateX(-50%); background: linear-gradient(180deg, rgba(240,189,112,.2), rgba(240,189,112,.025) 75%, transparent); clip-path: polygon(37% 0, 63% 0, 100% 100%, 0 100%); filter: blur(3px); }
+    .stage-floor { position: absolute; bottom: 32px; left: 12%; right: 11%; height: 78px; border-radius: 50%; background: radial-gradient(ellipse, rgba(240,189,112,.16), rgba(240,189,112,.025) 46%, transparent 71%); border-top: 1px solid rgba(246,202,143,.18); }
+    .performer { position: relative; width: 240px; height: 315px; z-index: 1; filter: drop-shadow(0 12px 25px rgba(240,189,112,.12)); animation: breathe 4.5s ease-in-out infinite; }
+    .float-note { position: absolute; z-index: 2; display: flex; gap: 10px; align-items: center; padding: 10px 12px; background: rgba(20,22,21,.74); border: 1px solid rgba(255,255,255,.13); backdrop-filter: blur(8px); border-radius: 3px; color: #e9e0d2; font-size: 10px; letter-spacing: .04em; }
+    .float-note strong { display: block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; margin-bottom: 3px; }
+    .float-note small { color: #aaa79e; font: 9px var(--mono); }
+    .float-note .tiny-icon { color: var(--gold); width: 27px; height: 27px; border-radius: 50%; border: 1px solid rgba(240,189,112,.35); display: grid; place-items: center; font: 10px var(--mono); }
+    .note-top { top: 48px; right: 34px; }
+    .note-bottom { bottom: 64px; left: 14px; }
+    .stage-caption { position: absolute; bottom: 27px; right: 32px; color: rgba(242,235,221,.44); font: 9px var(--mono); letter-spacing: .12em; }
+
+    .ticker { height: 57px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; letter-spacing: .04em; }
+    .ticker-left { display: flex; align-items: center; gap: 10px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(238,112,81,.11); }
+    .ticker-right { font: 10px var(--mono); letter-spacing: .1em; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(300px, .82fr); gap: 25px; padding: 37px 0 70px; }
+    .section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; margin-bottom: 17px; }
+    .section-heading h2 { font-size: 19px; letter-spacing: -.05em; margin: 0; }
+    .section-heading p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .section-kicker { color: var(--muted); font: 9px var(--mono); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+    .program-card { background: #f7f4ed; border: 1px solid rgba(36,36,31,.1); border-radius: 6px; overflow: hidden; box-shadow: 0 9px 30px rgba(30,29,24,.04); }
+    .program-head { padding: 21px 22px 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; }
+    .program-title-wrap { min-width: 0; }
+    .program-title { margin: 0; font-size: 17px; letter-spacing: -.04em; font-weight: 800; }
+    .program-meta { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; margin-top: 6px; }
+    .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: #aaa79e; }
+    .icon-btn { border: 1px solid var(--line); background: transparent; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; cursor: pointer; transition: .2s ease; flex: none; }
+    .icon-btn:hover { background: var(--paper-deep); }
+    .program-rule { height: 1px; margin: 0 22px; background: var(--line); }
+    .timeline { list-style: none; margin: 0; padding: 6px 22px 16px; }
+    .timeline-item { display: grid; grid-template-columns: 34px minmax(0,1fr) auto auto; gap: 12px; align-items: center; min-height: 60px; position: relative; }
+    .timeline-item:not(:last-child):after { content: ''; position: absolute; top: 43px; left: 15px; width: 1px; height: 24px; background: #d5cfc3; }
+    .timeline-num { border: 1px solid #d9d2c5; color: #8c867b; background: #f3efe7; border-radius: 50%; width: 31px; height: 31px; display: grid; place-items: center; font: 9px var(--mono); }
+    .timeline-item:first-child .timeline-num, .timeline-item:last-child .timeline-num { border-color: #c1c8b8; background: #ebefe5; color: #5a7257; }
+    .timeline-copy strong { display: block; font-size: 12px; letter-spacing: -.02em; }
+    .timeline-copy small { color: var(--muted); font-size: 10px; display: block; margin-top: 3px; }
+    .timeline-time { color: #6d6c64; font: 10px var(--mono); }
+    .demo-link { border: 0; background: transparent; color: #9a5b48; font-size: 9px; font-weight: 700; padding: 6px 0 6px 5px; cursor: pointer; white-space: nowrap; }
+    .demo-link:hover { color: var(--accent); text-decoration: underline; }
+    .program-footer { background: #eeebe3; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 22px; }
+    .tiny-stat { display: flex; align-items: center; gap: 7px; color: #6e7068; font-size: 10px; }
+    .tiny-stat svg { width: 14px; height: 14px; color: #839079; }
+    .action-stack { display: grid; gap: 12px; }
+    .action-card { border-radius: 5px; padding: 18px; border: 1px solid var(--line); background: rgba(248,245,238,.73); display: grid; grid-template-columns: 42px 1fr 29px; gap: 13px; align-items: center; transition: .2s ease; }
+    .action-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(31,30,26,.07); }
+    .action-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: #e7e4d9; color: #41443c; }
+    .action-card.primary { background: #232623; border-color: #232623; color: var(--cream); }
+    .action-card.primary .action-icon { background: rgba(240,189,112,.12); color: var(--gold); }
+    .action-icon svg { width: 18px; height: 18px; }
+    .action-copy strong { display: block; font-size: 12px; }
+    .action-copy small { display: block; color: var(--muted); font-size: 10px; line-height: 1.55; margin-top: 4px; }
+    .action-card.primary .action-copy small { color: #aaa99f; }
+    .action-arrow { width: 27px; height: 27px; border: 1px solid var(--line); display: grid; place-items: center; border-radius: 50%; color: var(--muted); }
+    .action-card.primary .action-arrow { border-color: rgba(255,255,255,.2); color: var(--gold); }
+    .action-arrow svg { width: 13px; height: 13px; }
+    .blindbox-card { margin-top: 17px; padding: 16px; border: 1px solid rgba(238,112,81,.23); background: linear-gradient(120deg, rgba(248,222,207,.75), rgba(249,244,231,.82)); display: grid; grid-template-columns: 40px 1fr auto; gap: 11px; align-items: center; border-radius: 4px; }
+    .blindbox-stamp { width: 40px; height: 40px; display: grid; place-items: center; color: #9b4b38; font: 18px Georgia,serif; border: 1px dashed rgba(155,75,56,.48); border-radius: 50%; transform: rotate(-8deg); }
+    .blindbox-copy small { color: #9a6253; display: block; font: 8px var(--mono); letter-spacing: .11em; }
+    .blindbox-copy strong { font-size: 11px; display: block; margin-top: 4px; }
+    .blindbox-copy span { color: #79736a; display: block; font-size: 9px; margin-top: 3px; }
+    .draw-button { border: 1px solid rgba(155,75,56,.3); color: #8b4030; background: rgba(255,255,255,.42); border-radius: 3px; padding: 9px 10px; font-size: 9px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+    .draw-button:hover { background: #fff9f1; }
+    .blindbox-stamp.shaking { animation: stampShake .16s ease-in-out 4; }
+    .page-footer { border-top: 1px solid var(--line); padding: 17px 0 25px; display: flex; justify-content: space-between; gap: 12px; color: #8b887f; font: 9px var(--mono); letter-spacing: .08em; }
+
+    /* dialogs / focused modes */
+    .backdrop { position: fixed; inset: 0; z-index: 20; padding: 24px; background: rgba(16,18,17,.68); backdrop-filter: blur(7px); display: none; align-items: center; justify-content: center; }
+    .backdrop.show { display: flex; animation: fadein .18s ease-out; }
+    .dialog { width: min(700px, 100%); max-height: min(88vh, 850px); overflow: auto; border-radius: 7px; background: var(--paper); box-shadow: 0 35px 110px rgba(0,0,0,.35); animation: rise .22s ease-out; }
+    .dialog-head { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 25px; background: rgba(238,234,225,.94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 20px; letter-spacing: -.05em; }
+    .dialog-head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .dialog-body { padding: 20px 25px 25px; }
+    .field-label { display: block; color: var(--muted); font-size: 10px; font-weight: 700; margin: 0 0 7px; }
+    .text-field { width: 100%; border: 1px solid #d4cec2; background: #f9f6ef; border-radius: 3px; padding: 11px 12px; color: var(--ink); font-size: 13px; }
+    .editor-list { display: grid; gap: 8px; margin-top: 18px; }
+    .editor-row { background: #f7f4ed; border: 1px solid var(--line); border-radius: 4px; padding: 11px; display: grid; grid-template-columns: 60px minmax(100px,1fr) 90px 82px; gap: 9px; align-items: center; }
+    .editor-label { color: var(--muted); font: 9px var(--mono); letter-spacing: .06em; }
+    .editor-row input { min-width: 0; border: 1px solid #ddd6ca; background: #fffdf7; padding: 8px; border-radius: 3px; font-size: 11px; }
+    .editor-row input.time-input { text-align: center; font: 11px var(--mono); }
+    .editor-controls { display: flex; gap: 4px; justify-content: flex-end; }
+    .mini-btn { width: 25px; height: 27px; border: 1px solid var(--line); border-radius: 3px; background: transparent; cursor: pointer; font-size: 11px; }
+    .mini-btn:hover { background: var(--paper-deep); }
+    .mini-btn.remove:hover { color: #a83d2d; background: #f4dcd4; }
+    .library { margin-top: 23px; }
+    .library-title { font-size: 11px; font-weight: 800; margin-bottom: 10px; }
+    .library-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .library-chip { border: 1px solid #d8d1c4; background: transparent; border-radius: 99px; padding: 8px 11px; color: #57584f; font-size: 10px; cursor: pointer; }
+    .library-chip:hover { border-color: var(--accent); color: #9f4938; }
+    .dialog-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .total-time { color: var(--muted); font-size: 10px; }
+    .total-time strong { color: var(--ink); font: 12px var(--mono); margin-left: 5px; }
+    .preset-dialog { width: min(930px,100%); }
+    .preset-toolbar { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 17px; }
+    .filter-chip { border: 1px solid #d8d1c4; background: transparent; border-radius: 99px; padding: 8px 12px; color: #68675f; font-size: 10px; cursor: pointer; }
+    .filter-chip.active, .filter-chip:hover { background: var(--ink); color: #f7f3eb; border-color: var(--ink); }
+    .preset-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; }
+    .preset-card { border: 1px solid var(--line); background: #f8f5ef; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; min-height: 190px; transition: .2s ease; }
+    .preset-card:hover { transform: translateY(-2px); border-color: rgba(238,112,81,.5); box-shadow: 0 10px 26px rgba(31,30,26,.06); }
+    .preset-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .preset-tag { color: #8b5c4e; background: #f2e2d8; border-radius: 2px; padding: 5px 7px; font-size: 8px; font-weight: 700; }
+    .preset-time { color: var(--muted); font: 9px var(--mono); }
+    .preset-card h3 { margin: 13px 0 5px; font-size: 13px; letter-spacing: -.04em; }
+    .preset-card p { color: var(--muted); margin: 0; font-size: 9px; line-height: 1.6; }
+    .preset-cues { color: #65655d; font-size: 8px; line-height: 1.6; margin: 10px 0 13px; }
+    .preset-card .btn { margin-top: auto; width: 100%; min-height: 34px; }
+
+    .demo-dialog { width: min(810px,100%); background: #f0ece3; border-radius: 6px; overflow: hidden; box-shadow: 0 35px 110px rgba(0,0,0,.4); }
+    .demo-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 21px; background: #1d211e; color: var(--cream); }
+    .demo-head small { display:block; color: #b1ab9e; font: 8px var(--mono); letter-spacing: .12em; margin-bottom: 4px; }
+    .demo-head strong { font-size: 14px; }
+    .demo-main { display: grid; grid-template-columns: 1.04fr .96fr; gap: 24px; padding: 22px; }
+    .demo-stage { min-height: 320px; position: relative; display:grid; place-items:center; overflow:hidden; border-radius:4px; background: radial-gradient(ellipse at 50% 88%, rgba(238,112,81,.17), transparent 38%), linear-gradient(150deg,#252a26,#171a19); }
+    .demo-stage:before { content:''; position:absolute; width:310px; height:260px; top:0; background:linear-gradient(180deg,rgba(240,189,112,.13),transparent); clip-path:polygon(38% 0,62% 0,100% 100%,0 100%); }
+    .demo-svg { width: min(94%,370px); height:auto; position:relative; z-index:1; }
+    .demo-floor { stroke:rgba(240,189,112,.28); stroke-width:1; }
+    .demo-ring { fill:none; stroke:rgba(240,189,112,.1); stroke-width:1; }
+    .demo-figure { stroke:#f2c985; stroke-width:11; stroke-linecap:round; stroke-linejoin:round; fill:none; filter:drop-shadow(0 2px 8px rgba(240,189,112,.18)); }
+    .demo-head-dot { fill:#f2c985; stroke:none; }
+    .demo-pose { animation-duration:3.4s; animation-iteration-count:infinite; animation-timing-function:ease-in-out; }
+    .demo-pose.pose-a { animation-name: demoPoseA; }
+    .demo-pose.pose-b { animation-name: demoPoseB; }
+    @keyframes demoPoseA { 0%,28% { opacity:1; } 38%,72% { opacity:0; } 84%,100% { opacity:1; } }
+    @keyframes demoPoseB { 0%,28% { opacity:0; } 38%,72% { opacity:1; } 84%,100% { opacity:0; } }
+    .demo-stage-label { position:absolute; left:13px; bottom:12px; color:#b2aea2; font:8px var(--mono); letter-spacing:.1em; }
+    .demo-details { display:flex; flex-direction:column; }
+    .demo-details .section-kicker { color:#956450; }
+    .demo-details h2 { margin:2px 0 8px; font-size:23px; letter-spacing:-.06em; }
+    .demo-details p { color:#6f6e66; font-size:10px; line-height:1.75; margin:0; }
+    .form-cues { list-style:none; padding:0; margin:17px 0; display:grid; gap:10px; }
+    .form-cues li { display:grid; grid-template-columns:20px 1fr; gap:8px; color:#494a43; font-size:10px; line-height:1.6; }
+    .form-cues li i { display:grid; place-items:center; width:18px; height:18px; border-radius:50%; background:#dce5d7; color:#526c50; font:9px var(--mono); font-style:normal; }
+    .demo-actions { display:grid; gap:8px; margin-top:auto; }
+    .demo-actions .btn { width:100%; }
+    .demo-fineprint { color:#858278; font-size:8px!important; margin-top:9px!important; }
+    .demo-inline { border:0; color:#eabf81; background:transparent; padding:10px 0 0; font-size:10px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+    .demo-inline:hover { color:#ffe0a9; }
+    .coach-dialog { width:min(1020px,100%); max-height:92vh; overflow:auto; background:#1b1f1c; color:#f7f3eb; border:1px solid rgba(255,255,255,.14); border-radius:6px; box-shadow:0 35px 110px rgba(0,0,0,.48); }
+    .coach-head { display:flex; align-items:center; justify-content:space-between; padding:17px 21px; border-bottom:1px solid rgba(255,255,255,.1); }
+    .coach-head small { color:#aaa99f; display:block; font:8px var(--mono); letter-spacing:.13em; margin-bottom:4px; }
+    .coach-head strong { font-size:14px; }
+    .coach-content { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr); gap:18px; padding:18px; }
+    .camera-frame { background:#101210; border:1px solid rgba(255,255,255,.1); border-radius:4px; aspect-ratio:4/3; position:relative; overflow:hidden; display:grid; place-items:center; }
+    #coach-video, #pose-canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+    #coach-video { opacity:.86; }
+    #pose-canvas { pointer-events:none; }
+    .camera-placeholder { position:relative; z-index:2; width:min(84%,350px); text-align:center; color:#c6c2b8; font-size:11px; line-height:1.8; }
+    .camera-placeholder strong { display:block; color:#f2c985; font-size:14px; margin-bottom:6px; }
+    .camera-status { position:absolute; z-index:3; left:11px; top:11px; padding:7px 9px; color:#f4eee2; background:rgba(18,20,18,.72); border:1px solid rgba(255,255,255,.14); border-radius:2px; font:8px var(--mono); letter-spacing:.05em; }
+    .coach-panel { display:flex; flex-direction:column; gap:12px; }
+    .coach-state { padding:13px; border-left:2px solid var(--gold); background:rgba(255,255,255,.045); }
+    .coach-state small { color:#aaa99f; display:block; font:8px var(--mono); letter-spacing:.1em; margin-bottom:5px; }
+    .coach-state strong { font-size:12px; line-height:1.6; }
+    .rep-counter { padding:14px; border:1px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:space-between; }
+    .rep-counter span { color:#aaa99f; font-size:10px; }
+    .rep-counter strong { color:var(--gold); font:25px var(--mono); }
+    .coach-hints { padding:12px; background:rgba(255,255,255,.035); color:#b5b2a8; font-size:9px; line-height:1.8; }
+    .coach-hints strong { color:#e8dfce; display:block; font-size:10px; margin-bottom:4px; }
+    .coach-actions { display:flex; gap:8px; margin-top:auto; }
+    .coach-actions .btn { flex:1; }
+    .privacy-note { color:#85867e; font-size:8px; line-height:1.65; }
+    .rehearsal-note { margin-top:12px; padding:0 2px; color:#77746c; font-size:9px; line-height:1.7; }
+    .rehearsal-note strong { color:#373832; }
+    .demo-layer { z-index:23; }
+    .coach-layer { z-index:24; }
+
+    .experience { width: min(1080px, 100%); min-height: 560px; max-height: 92vh; overflow: auto; color: var(--cream); background: #191c1a; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; box-shadow: 0 35px 110px rgba(0,0,0,.45); position: relative; }
+    .experience:before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 38%, rgba(238,112,81,.1), transparent 48%), linear-gradient(110deg, rgba(255,255,255,.018), transparent 50%); }
+    .experience-inner { position: relative; z-index: 1; min-height: inherit; padding: 22px 28px 26px; display: flex; flex-direction: column; }
+    .experience-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #aaa99f; font: 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .experience-brand { display: flex; align-items: center; gap: 8px; }
+    .experience-brand .live-dot { background: var(--gold); box-shadow: 0 0 0 4px rgba(240,189,112,.1); }
+    .exit-btn { background: transparent; color: #c3c0b7; border: 1px solid rgba(255,255,255,.2); border-radius: 3px; padding: 8px 11px; font-size: 10px; cursor: pointer; }
+    .exit-btn:hover { color: white; border-color: rgba(255,255,255,.5); }
+    .experience-body { flex: 1; display: grid; grid-template-columns: minmax(0,1.08fr) minmax(280px,.92fr); align-items: center; gap: 28px; padding: 30px 30px 23px; }
+    .experience-label { color: var(--gold); font: 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+    .experience-title { font-size: clamp(30px, 5vw, 53px); line-height: 1.1; letter-spacing: -.07em; margin: 13px 0 10px; }
+    .experience-desc { color: #aba9a0; font-size: 12px; line-height: 1.8; margin: 0; max-width: 290px; }
+    .experience-move { display: inline-flex; margin-top: 19px; color: #d7d0c3; padding: 8px 10px; border: 1px solid rgba(255,255,255,.15); border-radius: 2px; font-size: 10px; }
+    .live-demo { margin-top: 15px; padding: 11px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.035); border-radius: 3px; }
+    .live-demo-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:9px; color:#d7d0c3; font-size:10px; font-weight:800; }
+    .live-demo-head small { color:#aaa99f; font:8px var(--mono); letter-spacing:.08em; }
+    .live-demo-layout { display:grid; grid-template-columns:minmax(130px,.76fr) minmax(0,1.24fr); align-items:center; gap:11px; }
+    .live-demo-figure { min-height:125px; display:grid; place-items:center; overflow:hidden; background:radial-gradient(ellipse at 50% 90%,rgba(238,112,81,.12),transparent 50%),#111412; border-radius:2px; }
+    .live-demo-figure .demo-svg { width:100%; max-width:200px; height:auto; }
+    .live-demo-figure .demo-ring { stroke:rgba(240,189,112,.07); }
+    .live-demo-figure .demo-floor { stroke:rgba(240,189,112,.24); }
+    .live-demo-figure .demo-figure { stroke-width:10; }
+    .live-demo-cues { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+    .live-demo-cues li { display:grid; grid-template-columns:15px 1fr; gap:6px; align-items:start; color:#c0beb5; font-size:10px; line-height:1.55; }
+    .live-demo-cues i { color:var(--gold); font:8px var(--mono); font-style:normal; padding-top:1px; }
+    .live-demo-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:9px; color:#8f9088; font-size:8px; }
+    .live-coach-button { border:1px solid rgba(240,189,112,.36); color:#f0c784; background:rgba(240,189,112,.08); border-radius:2px; padding:7px 9px; font-size:8px; font-weight:700; cursor:pointer; white-space:nowrap; }
+    .live-coach-button:hover { background:rgba(240,189,112,.17); }
+    .clock-wrap { justify-self: center; text-align: center; position: relative; width: min(100%, 360px); }
+    .clock-ring { width: min(64vw, 300px); aspect-ratio: 1; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; position: relative; background: conic-gradient(var(--accent) var(--progress, 0%), rgba(255,255,255,.1) 0); transition: background .35s linear; }
+    .clock-ring:before { content: ''; position: absolute; inset: 5px; border-radius: inherit; background: #191c1a; }
+    .clock-inside { position: relative; z-index: 1; }
+    .clock-time { font: 500 clamp(43px, 7vw, 65px) var(--mono); letter-spacing: -.09em; font-variant-numeric: tabular-nums; }
+    .clock-caption { font: 9px var(--mono); letter-spacing: .15em; color: #aaa99f; margin-top: 8px; }
+    .clock-play { position: absolute; z-index: 2; right: 23px; bottom: 35px; width: 48px; height: 48px; border: 0; border-radius: 50%; background: var(--gold); color: #211d17; display: grid; place-items: center; cursor: pointer; box-shadow: 0 7px 25px rgba(240,189,112,.22); }
+    .clock-play svg { width: 17px; height: 17px; }
+    .experience-progress { padding: 0 30px; }
+    .progress-top { display: flex; justify-content: space-between; gap: 10px; color: #aaa99f; font: 9px var(--mono); letter-spacing: .07em; margin-bottom: 9px; }
+    .progress-track { display: flex; gap: 4px; }
+    .progress-segment { height: 3px; border-radius: 3px; background: rgba(255,255,255,.13); flex: 1; overflow: hidden; }
+    .progress-segment.done, .progress-segment.current { background: var(--accent); }
+    .progress-segment.current { box-shadow: 0 0 8px rgba(238,112,81,.55); }
+    .experience-bottom { display: flex; justify-content: center; gap: 10px; padding: 21px 30px 0; }
+    .preview-nav { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+    .preview-nav span { color: #aaa99f; font-size: 10px; }
+    .session-summary { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 55px 30px; min-height: 500px; }
+    .summary-star { font-size: 37px; color: var(--gold); margin-bottom: 14px; animation: twinkle 2.5s ease infinite; }
+    .session-summary .experience-label { color: var(--gold); }
+    .session-summary h2 { font-size: clamp(36px, 6vw, 58px); letter-spacing: -.08em; margin: 12px 0; }
+    .summary-copy { color: #b9b7ae; font-size: 12px; line-height: 1.8; }
+    .summary-stats { display: flex; gap: 1px; margin: 27px 0; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.1); }
+    .summary-stat { min-width: 125px; padding: 15px 18px; background: #1e211f; }
+    .summary-stat strong { display: block; font: 19px var(--mono); color: var(--gold); }
+    .summary-stat span { display: block; margin-top: 5px; color: #aaa99f; font-size: 9px; }
+    .summary-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .summary-actions .btn-ghost { background: transparent; }
+    .confirm-card { width: min(370px, 100%); background: var(--paper); color: var(--ink); border-radius: 6px; padding: 25px; box-shadow: var(--shadow); }
+    .confirm-card h3 { margin: 0 0 7px; font-size: 19px; letter-spacing: -.05em; }
+    .confirm-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .confirm-actions { display: flex; gap: 9px; margin-top: 19px; justify-content: flex-end; }
+    .toast { position: fixed; z-index: 40; left: 50%; bottom: 25px; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; transition: .22s ease; color: #f9f3e9; background: #272a27; padding: 11px 15px; border-radius: 3px; font-size: 11px; box-shadow: 0 9px 30px rgba(0,0,0,.2); }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    [data-theme="neon"] { --accent: #bc7aff; --accent-soft: #eadbff; --gold: #8cf1d2; --green: #93cfc1; }
+    [data-theme="neon"] .hero:before { background: radial-gradient(ellipse at 75% 30%, rgba(188,122,255,.24), transparent 34%), radial-gradient(ellipse at 88% 90%, rgba(65,218,192,.11), transparent 30%), linear-gradient(120deg, #15191e, #20202b 62%, #211d29); }
+    [data-theme="morning"] { --accent: #668466; --accent-soft: #dce8d9; --gold: #e3ad63; --green: #9db798; }
+    [data-theme="morning"] .hero:before { background: radial-gradient(ellipse at 75% 30%, rgba(193,160,108,.22), transparent 34%), linear-gradient(120deg, #26322c 8%, #34463a 57%, #554b3c); }
+    @keyframes breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: none; } }
+    @keyframes pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    @keyframes twinkle { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.1); opacity: 1; } }
+    @keyframes stampShake { 0%,100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(9deg) scale(1.12); } }
+    @media (max-width: 850px) {
+      .shell { width: min(100% - 38px, 700px); }
+      .hero-grid { grid-template-columns: 1fr .8fr; }
+      .hero-copy { padding-left: 36px; }
+      .stage-frame { transform: scale(.87); }
+      .note-top { right: 9px; }
+      .note-bottom { left: 0; }
+      .content-grid { grid-template-columns: 1fr; }
+      .action-stack { grid-template-columns: 1fr 1fr; }
+      .rehearsal-note { margin-top: 12px; }
+      .preset-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .coach-content { grid-template-columns: 1fr; }
+      .camera-frame { aspect-ratio: 16/10; }
+      .experience-body { grid-template-columns:minmax(0,1fr) minmax(260px,.82fr); gap:18px; padding:28px 18px 20px; }
+      .experience-progress { padding:0 18px; }
+      .experience-bottom { padding-left:18px; padding-right:18px; }
+    }
+    @media (max-width: 600px) {
+      .shell { width: calc(100% - 28px); }
+      .topbar { height: 70px; }
+      .edition { display: none; }
+      .theme-trigger { padding: 9px 10px; }
+      .theme-trigger .theme-label { display: none; }
+      .hero { border-radius: 5px; }
+      .hero-grid { display: flex; flex-direction: column; align-items: stretch; min-height: 0; }
+      .hero-copy { padding: 35px 25px 2px; }
+      .hero h1 { font-size: clamp(41px, 12vw, 58px); margin: 17px 0 12px; }
+      .hero-lede { max-width: 310px; font-size: 12px; }
+      .hero-buttons { margin-top: 22px; }
+      .hero-buttons .btn { padding: 12px 14px; min-height: 43px; font-size: 11px; }
+      .hero-footnote { margin-top: 15px; }
+      .stage-art { min-height: 270px; max-height: 270px; margin-top: -8px; }
+      .stage-frame { transform: scale(.69); transform-origin: center; height: 340px; margin-top: -12px; }
+      .stage-art:before { width: 350px; height: 280px; }
+      .note-top { top: 12px; right: 13px; }
+      .note-bottom { bottom: 22px; left: 15px; }
+      .stage-caption { bottom: 16px; right: 18px; font-size: 7px; }
+      .curtain-edge { width: 14px; }
+      .ticker { height: 48px; font-size: 9px; }
+      .ticker-right { font-size: 8px; }
+      .content-grid { padding: 27px 0 45px; gap: 26px; }
+      .section-heading { margin-bottom: 13px; }
+      .section-heading h2 { font-size: 17px; }
+      .program-head { padding: 17px 16px 13px; }
+      .program-rule { margin: 0 16px; }
+      .timeline { padding: 5px 16px 12px; }
+      .program-footer { padding: 12px 16px; }
+      .action-stack { grid-template-columns: 1fr; }
+      .action-card { padding: 14px; }
+      .blindbox-card { grid-template-columns: 40px 1fr; }
+      .draw-button { grid-column: 1 / -1; }
+      .timeline-item { grid-template-columns: 30px minmax(0,1fr) auto auto; gap: 7px; }
+      .timeline-item:not(:last-child):after { left: 14px; }
+      .demo-link { font-size: 8px; }
+      .preset-grid { grid-template-columns: 1fr; }
+      .preset-card { min-height: 0; }
+      .demo-main { grid-template-columns: 1fr; gap: 17px; padding: 14px; }
+      .demo-stage { min-height: 250px; }
+      .demo-details h2 { font-size: 20px; }
+      .coach-content { padding: 12px; }
+      .camera-frame { aspect-ratio: 4/3; }
+      .coach-panel { gap: 8px; }
+      .page-footer { font-size: 7px; }
+      .backdrop { padding: 10px; }
+      .dialog { max-height: 94vh; }
+      .dialog-head { padding: 18px; }
+      .dialog-body { padding: 16px 18px 20px; }
+      .editor-row { grid-template-columns: 42px minmax(80px,1fr) 73px 73px; gap: 6px; padding: 8px; }
+      .editor-label { font-size: 8px; }
+      .editor-row input { padding: 7px 5px; font-size: 10px; }
+      .editor-controls { gap: 2px; }
+      .mini-btn { width: 22px; height: 25px; }
+      .experience { min-height: 0; max-height: 96vh; }
+      .experience-inner { padding: 16px 16px 18px; }
+      .experience-body { grid-template-columns: 1fr; gap: 21px; padding: 35px 5px 20px; text-align: center; }
+      .experience-desc { margin: 0 auto; }
+      .experience-move { margin-top: 12px; }
+      .clock-wrap { grid-row: 1; }
+      .clock-ring { width: min(57vw, 220px); }
+      .clock-time { font-size: 47px; }
+      .clock-play { width: 41px; height: 41px; right: 11px; bottom: 19px; }
+      .experience-title { font-size: 35px; margin: 8px 0; }
+      .live-demo { text-align:left; }
+      .live-demo-layout { grid-template-columns:1fr; gap:9px; }
+      .live-demo-figure { min-height:155px; }
+      .live-demo-figure .demo-svg { max-width:230px; }
+      .live-demo-cues { grid-template-columns:1fr; }
+      .experience-progress { padding: 0 5px; }
+      .experience-bottom { padding: 16px 5px 0; }
+      .session-summary { min-height: 490px; padding: 40px 15px; }
+      .summary-stat { min-width: 92px; padding: 13px 11px; }
+      .summary-stat strong { font-size: 16px; }
+      .summary-copy { max-width: 280px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <a class="brand" href="#top" aria-label="身体排练室首页">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span><span class="brand-name">身体排练室</span><span class="brand-sub">BODY REHEARSAL ROOM</span></span>
+    </a>
+    <div class="top-actions">
+      <span class="edition">VOL. 01 &nbsp;·&nbsp; MOVE WITH FEELING</span>
+      <div class="theme-select">
+        <button class="theme-trigger" id="theme-trigger" aria-expanded="false" aria-haspopup="true"><span class="theme-dot"></span><span class="theme-label" id="theme-label">黑盒剧场</span><span aria-hidden="true">⌄</span></button>
+        <div class="theme-menu" id="theme-menu" role="menu">
+          <button class="theme-option selected" data-theme-choice="stage" role="menuitem"><span class="theme-swatch" style="--swatch:#ee7051"></span>黑盒剧场 <small>01</small></button>
+          <button class="theme-option" data-theme-choice="neon" role="menuitem"><span class="theme-swatch" style="--swatch:#bc7aff"></span>像素霓虹 <small>02</small></button>
+          <button class="theme-option" data-theme-choice="morning" role="menuitem"><span class="theme-swatch" style="--swatch:#668466"></span>清爽晨练 <small>03</small></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="shell">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">你的身体 · 今日主场</div>
+          <h1 id="hero-title">把训练，<br>排成一场<span>好戏。</span></h1>
+          <p class="hero-lede">不用等状态完美才登台。选好动作、跟着节奏，让每一次练习都有自己的开场与谢幕。</p>
+          <div class="hero-buttons">
+            <button class="btn btn-primary" id="start-button"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.4v9.2a.7.7 0 0 0 1.08.59l7-4.6a.7.7 0 0 0 0-1.18l-7-4.6A.7.7 0 0 0 5 3.4Z"/></svg>正式开演</button>
+            <button class="btn btn-ghost" id="preview-button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M1.5 8s2.3-4 6.5-4 6.5 4 6.5 4-2.3 4-6.5 4-6.5-4-6.5-4Z"/><circle cx="8" cy="8" r="1.8"/></svg>先走台</button>
+          </div>
+          <div class="hero-footnote"><span>✳</span> 一切按自己的状态来，舒服地动起来就很好。</div>
+        </div>
+        <div class="stage-art" aria-label="聚光灯下的运动者剪影">
+          <div class="stage-frame">
+            <div class="spotlight"></div><div class="halo"></div><div class="stage-floor"></div>
+            <svg class="performer" viewBox="0 0 260 340" fill="none" aria-hidden="true">
+              <defs><linearGradient id="bodyline" x1="40" y1="40" x2="220" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE1A4"/><stop offset="1" stop-color="#E57C5B"/></linearGradient></defs>
+              <circle cx="134" cy="58" r="23" fill="#F0BD70"/>
+              <path d="M127 86C115 104 109 122 110 143L117 189L154 191L165 146C168 124 159 99 145 87" fill="url(#bodyline)" opacity=".92"/>
+              <path d="M117 107L79 139L55 121M156 109L185 136L212 122" stroke="#F4D49E" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M119 185L99 232L68 264L47 264M152 188L176 226L204 244L226 237" stroke="url(#bodyline)" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M40 271H82M215 245L238 240" stroke="#F0BD70" stroke-width="9" stroke-linecap="round"/>
+              <path d="M115 131C129 138 148 138 163 130" stroke="#FFF1D2" stroke-opacity=".62" stroke-width="2"/>
+              <path d="M108 180L158 181" stroke="#292622" stroke-opacity=".6" stroke-width="3"/>
+              <circle cx="134" cy="58" r="32" stroke="#F0BD70" stroke-opacity=".22"/>
+            </svg>
+            <div class="float-note note-top"><span class="tiny-icon">01</span><span><strong id="hero-session-title">今晚的轻量专场</strong><small id="hero-session-meta">10 MIN &nbsp; / &nbsp; 07 CUES</small></span></div>
+            <div class="float-note note-bottom"><span class="tiny-icon">✳</span><span><strong>当前状态：候场中</strong><small>YOUR PACE, YOUR STAGE</small></span></div>
+            <div class="stage-caption">SCENE 01 &nbsp; — &nbsp; YOUR BODY, YOUR STAGE</div>
+          </div>
+          <div class="curtain-edge" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker"><div class="ticker-left"><span class="live-dot"></span><span>今日排练单已就绪</span><span>·</span><span>先预览，也可以直接开练</span></div><span class="ticker-right">NO AUDITION NEEDED &nbsp; ✳</span></div>
+
+    <section class="content-grid" aria-label="今日训练安排">
+      <div>
+        <div class="section-heading">
+          <div><div class="section-kicker">TONIGHT'S PROGRAM</div><h2>今晚的轻量专场</h2><p>一份可以随时改动的节目单</p></div>
+          <span class="ticker-right" id="total-duration-label">10:00</span>
+        </div>
+        <div class="program-card">
+          <div class="program-head">
+            <div class="program-title-wrap"><h3 class="program-title" id="program-title">今晚的轻量专场</h3><div class="program-meta"><span id="program-count">7 个环节</span><span class="meta-dot"></span><span>热身 · 力量 · 放松</span></div></div>
+            <button class="icon-btn" id="edit-button" aria-label="编排节目单" title="编排节目单"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10.9 2.2a1.6 1.6 0 0 1 2.3 2.3L5.1 12.6l-3.2.8.8-3.2 8.2-8Z"/><path d="m9.8 3.3 2.3 2.3M2.8 9.7l2.3 2.3"/></svg></button>
+          </div>
+          <div class="program-rule"></div>
+          <ol class="timeline" id="timeline"></ol>
+          <div class="program-footer"><span class="tiny-stat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.3 1.5"/></svg><span>约 <strong id="duration-minutes">10</strong> 分钟，刚好给自己一点时间</span></span><span class="ticker-right">✳ &nbsp; EDITABLE</span></div>
+        </div>
+      </div>
+      <aside>
+        <div class="section-heading"><div><div class="section-kicker">CHOOSE YOUR CUE</div><h2>准备好了就上场</h2><p>选一种节奏，开始今天的排练</p></div></div>
+        <div class="action-stack">
+          <button class="action-card primary" id="start-card">
+            <span class="action-icon"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.2 3.6v12.8c0 .8.9 1.3 1.6.8l9-6.4a1 1 0 0 0 0-1.6l-9-6.4c-.7-.5-1.6 0-1.6.8Z"/></svg></span>
+            <span class="action-copy"><strong>正式开演</strong><small>开始真实计时，按节奏完成每一幕。</small></span><span class="action-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h9M8 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="action-card" id="preview-card">
+            <span class="action-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><path d="M1.7 10s2.9-5.2 8.3-5.2 8.3 5.2 8.3 5.2-2.9 5.2-8.3 5.2S1.7 10 1.7 10Z"/><circle cx="10" cy="10" r="2.2"/></svg></span>
+            <span class="action-copy"><strong>先走台预览</strong><small>不计时，先看看动作顺序和提示。</small></span><span class="action-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h9M8 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="action-card" id="presets-button">
+            <span class="action-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M4 4.5h12v12H4zM7 2.5v4M13 2.5v4M4 8h12M7 11h2M11 11h2M7 14h2"/></svg></span>
+            <span class="action-copy"><strong>逛逛剧目库</strong><small>按心情、部位和时长，挑一场适合现在的。</small></span><span class="action-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h9M8 3l5 5-5 5"/></svg></span>
+          </button>
+        </div>
+        <div class="blindbox-card"><span class="blindbox-stamp">?</span><span class="blindbox-copy"><small>TONIGHT'S MYSTERY CUE</small><strong>没想好练什么？</strong><span>抽一张今晚的盲盒节目单</span></span><button class="draw-button" id="draw-button">摇一张 ✳</button></div>
+        <div class="rehearsal-note"><strong>给自己留个后台。</strong> 示范和识别是练习提示，请按自己的状态调整；如感到不适，暂停休息。</div>
+      </aside>
+    </section>
+    <footer class="page-footer"><span>身体排练室 &nbsp;·&nbsp; MOVE WITH FEELING</span><span>NO PRESSURE. JUST SHOW UP.</span></footer>
+  </main>
+
+  <div class="backdrop" id="editor-backdrop" aria-hidden="true">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="editor-heading">
+      <div class="dialog-head"><div><h2 id="editor-heading">编排你的节目单</h2><p>顺序、动作和时长，都可以按自己的节奏调整。</p></div><button class="icon-btn" id="close-editor" aria-label="关闭">×</button></div>
+      <div class="dialog-body">
+        <label class="field-label" for="title-input">这场演出叫什么？</label><input class="text-field" id="title-input" maxlength="24" value="今晚的轻量专场" />
+        <div class="editor-list" id="editor-list"></div>
+        <div class="library"><div class="library-title">加一幕 · 动作库</div><div class="library-list" id="library-list"></div></div>
+        <div class="dialog-actions"><span class="total-time">当前总时长 <strong id="editor-total">10:00</strong></span><button class="btn btn-primary btn-small" id="save-editor">保存节目单</button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="backdrop" id="presets-backdrop" aria-hidden="true">
+    <section class="dialog preset-dialog" role="dialog" aria-modal="true" aria-labelledby="presets-heading">
+      <div class="dialog-head"><div><h2 id="presets-heading">今晚演什么？</h2><p>按心情挑一场，节目单会替你排好。之后还可以继续改。</p></div><button class="icon-btn" id="close-presets" aria-label="关闭">×</button></div>
+      <div class="dialog-body"><div class="preset-toolbar" id="preset-filters"></div><div class="preset-grid" id="preset-grid"></div></div>
+    </section>
+  </div>
+
+  <div class="backdrop demo-layer" id="demo-backdrop" aria-hidden="true">
+    <section class="demo-dialog" role="dialog" aria-modal="true" aria-labelledby="demo-title">
+      <div class="demo-head"><div><small>MOVE CARD &nbsp; / &nbsp; 动作示范</small><strong id="demo-heading">动作名</strong></div><button class="exit-btn" id="close-demo">关闭 ×</button></div>
+      <div class="demo-main"><div class="demo-stage" id="demo-stage"><span class="demo-stage-label" id="demo-stage-label">MOVE 01 · TAKE A LOOK</span></div><div class="demo-details"><div class="section-kicker" id="demo-role">动作说明</div><h2 id="demo-title">动作名</h2><p id="demo-desc"></p><ul class="form-cues" id="demo-cues"></ul><div class="demo-actions"><button class="btn btn-primary" id="coach-launch">开启动作标准识别</button><button class="btn btn-line btn-small" id="close-demo-secondary">知道了，回去练</button></div><p class="demo-fineprint" id="demo-fineprint">识别会根据画面中的关节位置给出基础动作提示，不替代专业教练指导。</p></div></div>
+    </section>
+  </div>
+
+  <div class="backdrop coach-layer" id="coach-backdrop" aria-hidden="true">
+    <section class="coach-dialog" role="dialog" aria-modal="true" aria-labelledby="coach-heading">
+      <div class="coach-head"><div><small>ON-DEVICE POSE CHECK &nbsp; / &nbsp; 本机动作识别</small><strong id="coach-heading">深蹲 · 实时动作提示</strong></div><button class="exit-btn" id="close-coach">关闭识别 ×</button></div>
+      <div class="coach-content">
+        <div class="camera-frame"><video id="coach-video" autoplay playsinline muted></video><canvas id="pose-canvas"></canvas><span class="camera-status" id="camera-status">等待启动摄像头</span><div class="camera-placeholder" id="camera-placeholder"><strong>把自己放进聚光灯里</strong>请将手机或电脑固定好，尽量让身体完整进入画面。建议侧身站立，光线充足。</div></div>
+        <div class="coach-panel"><div class="coach-state"><small>实时提示</small><strong id="coach-feedback">点击下方按钮，授权摄像头并开始识别。</strong></div><div class="rep-counter"><span id="rep-label">动作次数</span><strong id="rep-count">00</strong></div><div class="coach-hints"><strong>本场观察要点</strong><span id="coach-hint-list">根据关节活动幅度提示动作节奏和范围；这不是对动作安全性的专业评估。</span></div><div class="coach-actions"><button class="btn btn-primary btn-small" id="camera-start">开启摄像头</button><button class="btn btn-ghost btn-small" id="camera-stop" disabled>暂停识别</button></div><p class="privacy-note">摄像头仅在你主动开启后使用。画面由浏览器本机实时分析，不录像、不上传；首次使用需要加载姿态模型。</p></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="backdrop" id="experience-backdrop" aria-hidden="true">
+    <section class="experience" role="dialog" aria-modal="true" aria-label="训练排练">
+      <div class="experience-inner" id="experience-content"></div>
+    </section>
+  </div>
+  <div class="backdrop" id="confirm-backdrop" aria-hidden="true">
+    <section class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-heading">
+      <h3 id="confirm-heading">现在谢幕吗？</h3><p>当前进度会如实记录，已经完成的环节也会保留。</p>
+      <div class="confirm-actions"><button class="btn btn-line btn-small" id="continue-session">继续练习</button><button class="btn btn-primary btn-small" id="confirm-end">结束训练</button></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const actionLibrary = [
+        { key:'warmup', role:'开场', title:'后台热身', duration:90, desc:'让身体慢慢醒过来', cue:'肩颈绕环 · 原地踏步', demoKey:'march' },
+        { key:'march', role:'加演', title:'原地踏步', duration:60, desc:'轻轻活动身体，不需要跳跃', cue:'放松肩膀，按节奏呼吸', demoKey:'march' },
+        { key:'shoulder', role:'加演', title:'肩颈舒展', duration:45, desc:'给肩颈一点空间', cue:'动作轻柔，不要用力拉扯', demoKey:'stretch' },
+        { key:'squat', role:'加演', title:'深蹲', duration:60, desc:'从舒服的幅度开始', cue:'脚掌稳定 · 膝盖跟脚尖同向', demoKey:'squat', coachKey:'squat' },
+        { key:'wall-sit', role:'加演', title:'靠墙静蹲', duration:40, desc:'找到能舒服停留的高度', cue:'背部轻靠墙面 · 保持呼吸', demoKey:'squat' },
+        { key:'rest', role:'换景', title:'喘口气', duration:30, desc:'喝口水，换个节奏', cue:'休息时间', demoKey:'breath' },
+        { key:'incline', role:'加演', title:'斜板俯卧撑', duration:45, desc:'找一个稳固、适合自己的支撑面', cue:'动作放慢 · 感受发力', demoKey:'pushup', coachKey:'pushup' },
+        { key:'pushup', role:'加演', title:'墙面俯卧撑', duration:45, desc:'用墙面作为支撑，轻松调整难度', cue:'身体保持自然直线', demoKey:'pushup', coachKey:'pushup' },
+        { key:'bridge', role:'加演', title:'臀桥', duration:60, desc:'轻轻收紧，再慢慢放下', cue:'保持自然呼吸 · 不要过度反弓', demoKey:'bridge', coachKey:'bridge' },
+        { key:'calf', role:'加演', title:'站姿提踵', duration:45, desc:'扶稳支撑物，慢慢抬起再落下', cue:'动作幅度以舒服为准', demoKey:'march' },
+        { key:'plank', role:'加演', title:'平板支撑', duration:30, desc:'从短时间开始，保持顺畅呼吸', cue:'肩、髋、脚踝保持自然直线', demoKey:'plank', coachKey:'plank' },
+        { key:'bird-dog', role:'加演', title:'鸟狗式', duration:60, desc:'四点支撑，交替伸展对侧手脚', cue:'慢慢伸展，保持躯干稳定', demoKey:'plank' },
+        { key:'dead-bug', role:'加演', title:'死虫式', duration:45, desc:'仰卧交替伸展对侧手脚', cue:'腰背舒服地贴近垫面', demoKey:'bridge' },
+        { key:'back-stretch', role:'加演', title:'肩背舒展', duration:60, desc:'给肩背和胸口一点空间', cue:'轻柔伸展，不要弹振', demoKey:'stretch' },
+        { key:'side-stretch', role:'加演', title:'站姿侧伸展', duration:45, desc:'左右交替伸展身体侧面', cue:'保持稳定，不要憋气', demoKey:'stretch' },
+        { key:'breath', role:'谢幕', title:'呼吸放松', duration:60, desc:'慢慢收尾，让呼吸回到舒服的节奏', cue:'自然呼吸，不必刻意控制', demoKey:'stretch' },
+        { key:'stretch', role:'谢幕', title:'拉伸放松', duration:90, desc:'把今天的练习轻轻收尾', cue:'慢一点 · 不要勉强', demoKey:'stretch' }
+      ];
+      const actionByKey = Object.fromEntries(actionLibrary.map(action => [action.key, action]));
+      function makeRoutine(entries) {
+        let actNo = 0;
+        return entries.map(([key, duration], index) => {
+          const source = actionByKey[key];
+          const role = key === 'rest' ? '换景' : index === 0 ? '开场' : index === entries.length - 1 ? '谢幕' : `第${['一','二','三','四','五','六','七'][actNo++] || actNo}幕`;
+          return { ...source, role, duration: duration || source.duration };
+        });
+      }
+      const presets = [
+        { title:'今晚的轻量专场', category:'轻松启动', description:'有热身、有停顿，也有好好收尾。', entries:[['warmup',120],['squat',90],['rest',45],['incline',90],['rest',45],['bridge',90],['stretch',120]] },
+        { title:'下班重启', category:'轻松启动', description:'把坐了一天的身体，慢慢重新点亮。', entries:[['shoulder',60],['march',60],['squat',60],['rest',30],['bird-dog',60],['back-stretch',90]] },
+        { title:'腿臀主场', category:'力量练习', description:'下肢和臀部轮流当主角，中间留了喘息。', entries:[['warmup',90],['squat',75],['rest',35],['bridge',75],['calf',45],['rest',30],['stretch',90]] },
+        { title:'上肢加演', category:'力量练习', description:'从墙面或斜板开始，按适合自己的方式推。', entries:[['warmup',75],['incline',60],['rest',35],['pushup',60],['shoulder',60],['stretch',75]] },
+        { title:'核心小剧场', category:'力量练习', description:'几段稳定练习，慢一点也完全可以。', entries:[['warmup',60],['plank',30],['rest',30],['dead-bug',60],['bird-dog',60],['stretch',75]] },
+        { title:'桌边充电站', category:'舒展恢复', description:'不用换衣服，也不用离开房间太远。', entries:[['shoulder',60],['back-stretch',60],['calf',45],['march',60],['side-stretch',60]] },
+        { title:'无声邻居友好场', category:'低冲击', description:'不跳、不冲刺，用安静的动作活动一下。', entries:[['march',75],['squat',60],['rest',30],['bridge',75],['bird-dog',60],['stretch',90]] },
+        { title:'睡前慢慢落幕', category:'舒展恢复', description:'轻柔舒展，不追求强度，只想放松下来。', entries:[['breath',75],['side-stretch',60],['back-stretch',60],['stretch',105]] },
+        { title:'晨光启动场', category:'轻松启动', description:'短短几幕，让早晨从身体醒来开始。', entries:[['march',75],['shoulder',60],['squat',60],['calf',45],['stretch',75]] },
+        { title:'十分钟全身单人场', category:'全身练习', description:'全身轮番出场，有空档，也有谢幕。', entries:[['warmup',90],['squat',60],['rest',30],['incline',60],['rest',30],['bridge',60],['plank',30],['stretch',90]] },
+        { title:'地板上的慢镜头', category:'舒展恢复', description:'不赶拍子，给背部和髋部一点舒展空间。', entries:[['breath',60],['dead-bug',60],['bridge',60],['rest',30],['side-stretch',60],['stretch',90]] },
+        { title:'十五分钟返场', category:'全身练习', description:'适合今天还想多练一会儿的你，记得按状态调整。', entries:[['warmup',120],['squat',90],['rest',45],['incline',90],['rest',45],['bridge',90],['bird-dog',60],['stretch',120]] }
+      ].map(preset => ({ ...preset, items: makeRoutine(preset.entries) }));
+      const defaultProgram = presets[0].items.map(item => ({...item}));
+      const library = actionLibrary.map(({key, ...item}) => item);
+      const themeNames = { stage: '黑盒剧场', neon: '像素霓虹', morning: '清爽晨练' };
+      const $ = (s, root = document) => root.querySelector(s);
+      const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+      const safeLoad = (key, fallback) => { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; } catch { return fallback; } };
+      let program = safeLoad('body-room-program-v1', defaultProgram);
+      if (!Array.isArray(program) || !program.length) program = defaultProgram.map(x => ({...x}));
+      let programTitle = safeLoad('body-room-title-v1', '今晚的轻量专场');
+      let activeTheme = safeLoad('body-room-theme-v1', 'stage');
+      let editDraft = [];
+      let editTitleDraft = '';
+      let mode = null;
+      let currentIndex = 0;
+      let remaining = 0;
+      let elapsedSeconds = 0;
+      let completedCount = 0;
+      let timerId = null;
+      let paused = false;
+      let toastId = null;
+      let currentDemoIndex = 0;
+      let demoFromExperience = false;
+      let resumeAfterDemo = false;
+      let resumeAfterCoach = false;
+      let currentCoachKey = null;
+      let cameraStream = null;
+      let poseLandmarker = null;
+      let poseModulePromise = null;
+      let poseFrameId = null;
+      let coachPhase = 'ready';
+      let coachReps = 0;
+      let lastCoachFeedback = '';
+      let blindboxTimer = null;
+      const heroDuration = $('#total-duration-label');
+
+      function esc(value) { return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+      function totalSeconds(items = program) { return items.reduce((sum, item) => sum + Math.max(0, Number(item.duration) || 0), 0); }
+      function fmt(seconds) { const n = Math.max(0, Math.floor(seconds)); return `${String(Math.floor(n / 60)).padStart(2,'0')}:${String(n % 60).padStart(2,'0')}`; }
+      function formatDuration(seconds) { return seconds >= 60 ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2,'0')}` : `0:${String(seconds).padStart(2,'0')}`; }
+      function persist() { try { localStorage.setItem('body-room-program-v1', JSON.stringify(program)); localStorage.setItem('body-room-title-v1', JSON.stringify(programTitle)); } catch {} }
+      function showToast(message) { const el = $('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toastId); toastId = setTimeout(() => el.classList.remove('show'), 2100); }
+      function setBackdrop(el, visible) { el.classList.toggle('show', visible); el.setAttribute('aria-hidden', String(!visible)); }
+      function setTheme(theme) { activeTheme = theme; document.documentElement.dataset.theme = theme === 'stage' ? '' : theme; if (theme === 'stage') document.documentElement.removeAttribute('data-theme'); $('#theme-label').textContent = themeNames[theme]; $$('.theme-option').forEach(btn => btn.classList.toggle('selected', btn.dataset.themeChoice === theme)); try { localStorage.setItem('body-room-theme-v1', JSON.stringify(theme)); } catch {} }
+      function getDemoKey(item) {
+        if (item?.demoKey) return item.demoKey;
+        const found = actionLibrary.find(action => action.title === item?.title);
+        if (found) return found.demoKey;
+        if (/深蹲|静蹲/.test(item?.title || '')) return 'squat';
+        if (/俯卧撑/.test(item?.title || '')) return 'pushup';
+        if (/臀桥/.test(item?.title || '')) return 'bridge';
+        if (/平板/.test(item?.title || '')) return 'plank';
+        if (/热身|踏步/.test(item?.title || '')) return 'march';
+        return 'stretch';
+      }
+      function getCoachKey(item) {
+        if (item?.coachKey) return item.coachKey;
+        const found = actionLibrary.find(action => action.title === item?.title);
+        if (found?.coachKey) return found.coachKey;
+        const key = getDemoKey(item);
+        return ['squat','pushup','bridge','plank'].includes(key) ? key : null;
+      }
+
+      function renderHome() {
+        $('#program-title').textContent = programTitle;
+        $('#program-count').textContent = `${program.length} 个环节`;
+        const secs = totalSeconds();
+        heroDuration.textContent = fmt(secs);
+        $('#duration-minutes').textContent = Math.max(1, Math.round(secs / 60));
+        $('#hero-session-title').textContent = programTitle;
+        $('#hero-session-meta').textContent = `${Math.max(1, Math.round(secs / 60))} MIN · ${String(program.length).padStart(2,'0')} CUES`;
+        $('#timeline').innerHTML = program.map((item, i) => `<li class="timeline-item"><span class="timeline-num">${String(i + 1).padStart(2,'0')}</span><span class="timeline-copy"><strong>${esc(item.role)}｜${esc(item.title)}</strong><small>${esc(item.desc || '按自己的节奏完成这一幕')}</small></span><span class="timeline-time">${formatDuration(Number(item.duration) || 0)}</span><button class="demo-link" data-demo-index="${i}" aria-label="查看${esc(item.title)}动作演示">看演示 ↗</button></li>`).join('');
+      }
+
+      const presetFilters = ['全部','轻松启动','力量练习','全身练习','舒展恢复','低冲击'];
+      function renderPresets(filter = '全部') {
+        $('#preset-filters').innerHTML = presetFilters.map(tag => `<button class="filter-chip ${tag === filter ? 'active' : ''}" data-filter="${esc(tag)}">${esc(tag)}</button>`).join('');
+        const visible = filter === '全部' ? presets : presets.filter(preset => preset.category === filter);
+        $('#preset-grid').innerHTML = visible.map(preset => { const index = presets.indexOf(preset); const duration = fmt(totalSeconds(preset.items)); const cueList = preset.items.slice(0,4).map(item => item.title).join(' · '); return `<article class="preset-card"><div class="preset-top"><span class="preset-tag">${esc(preset.category)}</span><span class="preset-time">${duration}</span></div><h3>${esc(preset.title)}</h3><p>${esc(preset.description)}</p><div class="preset-cues">${esc(cueList)}${preset.items.length > 4 ? ' · …' : ''}</div><button class="btn btn-line btn-small" data-preset-index="${index}">排这一场 →</button></article>`; }).join('');
+      }
+      function applyPreset(index, source = '剧目库') {
+        const chosen = presets[index]; if (!chosen) return;
+        program = chosen.items.map(item => ({...item})); programTitle = chosen.title; persist(); renderHome(); setBackdrop($('#presets-backdrop'), false); showToast(`${source}开出「${chosen.title}」`);
+      }
+      function drawBlindbox() {
+        const stamp = $('.blindbox-stamp'); const button = $('#draw-button');
+        if (blindboxTimer) return;
+        stamp.classList.add('shaking'); button.disabled = true; button.textContent = '正在抽签…';
+        blindboxTimer = setTimeout(() => {
+          const pool = presets.map((_, index) => index).filter(index => presets[index].title !== programTitle);
+          const selected = pool[Math.floor(Math.random() * pool.length)] ?? Math.floor(Math.random() * presets.length);
+          applyPreset(selected, '盲盒'); stamp.classList.remove('shaking'); button.disabled = false; button.textContent = '再摇一张 ✳'; blindboxTimer = null;
+        }, 650);
+      }
+      $('#presets-button').addEventListener('click', () => { renderPresets(); setBackdrop($('#presets-backdrop'), true); });
+      $('#close-presets').addEventListener('click', () => setBackdrop($('#presets-backdrop'), false));
+      $('#presets-backdrop').addEventListener('click', e => { if (e.target === $('#presets-backdrop')) setBackdrop($('#presets-backdrop'), false); });
+      $('#preset-filters').addEventListener('click', e => { const chip = e.target.closest('[data-filter]'); if (chip) renderPresets(chip.dataset.filter); });
+      $('#preset-grid').addEventListener('click', e => { const button = e.target.closest('[data-preset-index]'); if (button) applyPreset(Number(button.dataset.presetIndex)); });
+      $('#draw-button').addEventListener('click', drawBlindbox);
+
+      function openEditor() {
+        editDraft = program.map(x => ({...x})); editTitleDraft = programTitle;
+        renderEditor(); setBackdrop($('#editor-backdrop'), true); setTimeout(() => $('#title-input').focus(), 50);
+      }
+      function updateDraftFromInputs() {
+        $$('.editor-row').forEach(row => {
+          const index = Number(row.dataset.index); if (!editDraft[index]) return;
+          const roleInput = $('.role-input', row); if (roleInput) editDraft[index].role = roleInput.value;
+          editDraft[index].title = $('.name-input', row).value;
+          editDraft[index].duration = parseTime($('.time-input', row).value);
+        });
+        editTitleDraft = $('#title-input').value.trim() || '今天的练习';
+      }
+      function parseTime(value) {
+        const raw = String(value).trim();
+        if (/^\d{1,3}:\d{1,2}$/.test(raw)) { const [m,s] = raw.split(':').map(Number); return Math.max(5, Math.min(3600, m * 60 + Math.min(59,s))); }
+        return Math.max(5, Math.min(3600, Number.parseInt(raw, 10) || 30));
+      }
+      function renderEditor() {
+        $('#title-input').value = editTitleDraft;
+        $('#editor-list').innerHTML = editDraft.map((item, i) => `<div class="editor-row" data-index="${i}"><span class="editor-label">${String(i + 1).padStart(2,'0')} / ${esc(item.role)}</span><input class="name-input" aria-label="动作名称" maxlength="22" value="${esc(item.title)}"><input class="time-input" aria-label="时长 分:秒" value="${fmt(item.duration)}" inputmode="numeric"><span class="editor-controls"><button class="mini-btn up" aria-label="上移" ${i === 0 ? 'disabled' : ''}>↑</button><button class="mini-btn down" aria-label="下移" ${i === editDraft.length - 1 ? 'disabled' : ''}>↓</button><button class="mini-btn remove" aria-label="删除">×</button></span></div>`).join('');
+        $('#library-list').innerHTML = library.map((item, i) => `<button class="library-chip" data-add="${i}">＋ ${esc(item.title)}</button>`).join('');
+        $('#editor-total').textContent = fmt(totalSeconds(editDraft));
+      }
+      $('#editor-list').addEventListener('input', () => { updateDraftFromInputs(); $('#editor-total').textContent = fmt(totalSeconds(editDraft)); });
+      $('#editor-list').addEventListener('click', e => {
+        const row = e.target.closest('.editor-row'); if (!row) return;
+        updateDraftFromInputs(); const i = Number(row.dataset.index);
+        if (e.target.closest('.remove')) { if (editDraft.length === 1) { showToast('节目单至少要留一个环节'); return; } editDraft.splice(i,1); }
+        if (e.target.closest('.up') && i > 0) [editDraft[i-1], editDraft[i]] = [editDraft[i], editDraft[i-1]];
+        if (e.target.closest('.down') && i < editDraft.length - 1) [editDraft[i+1], editDraft[i]] = [editDraft[i], editDraft[i+1]];
+        renderEditor();
+      });
+      $('#library-list').addEventListener('click', e => { const btn = e.target.closest('[data-add]'); if (!btn) return; updateDraftFromInputs(); editDraft.push({...library[Number(btn.dataset.add)]}); renderEditor(); showToast('已加到节目单'); });
+      $('#title-input').addEventListener('input', () => { editTitleDraft = $('#title-input').value; });
+      $('#save-editor').addEventListener('click', () => { updateDraftFromInputs(); program = editDraft.filter(x => x.title.trim()).map(x => ({...x, title:x.title.trim(), role:x.role.trim() || '加演'})); if (!program.length) { showToast('至少留下一幕'); return; } programTitle = editTitleDraft || '今天的练习'; persist(); renderHome(); setBackdrop($('#editor-backdrop'), false); showToast('节目单已保存'); });
+      $('#edit-button').addEventListener('click', openEditor);
+      $('#close-editor').addEventListener('click', () => setBackdrop($('#editor-backdrop'), false));
+      $('#editor-backdrop').addEventListener('click', e => { if (e.target === $('#editor-backdrop')) setBackdrop($('#editor-backdrop'), false); });
+      $('#timeline').addEventListener('click', e => { const button = e.target.closest('[data-demo-index]'); if (button) openDemo(Number(button.dataset.demoIndex), false); });
+
+      function demoSvgFor(key) {
+        const figures = {
+          squat: [
+            `<g class="demo-figure demo-pose pose-a"><circle class="demo-head-dot" cx="180" cy="48" r="15"/><path d="M180 66V132M180 82L151 100L143 119M180 82L209 100L217 119M180 132L158 177L159 225M180 132L202 177L201 225M159 225L142 226M201 225L219 226"/></g>`,
+            `<g class="demo-figure demo-pose pose-b"><circle class="demo-head-dot" cx="180" cy="63" r="15"/><path d="M180 81L171 132M178 94L210 100L229 115M178 94L148 103L135 121M171 132L143 164L146 222M171 132L205 162L201 222M146 222L128 224M201 222L220 224"/></g>`
+          ],
+          pushup: [
+            `<g class="demo-figure demo-pose pose-a"><circle class="demo-head-dot" cx="276" cy="116" r="14"/><path d="M260 123L202 129L148 137L95 143M205 130L222 157L255 157M204 130L188 157L157 158M148 137L118 167L84 171M95 143L71 168L48 171M255 157H274M48 171H31"/></g>`,
+            `<g class="demo-figure demo-pose pose-b"><circle class="demo-head-dot" cx="276" cy="151" r="14"/><path d="M260 158L202 163L148 169L95 174M205 163L226 180L255 180M204 163L185 179L157 180M148 169L118 187L84 190M95 174L71 188L48 190M255 180H274M48 190H31"/></g>`
+          ],
+          bridge: [
+            `<g class="demo-figure demo-pose pose-a"><circle class="demo-head-dot" cx="57" cy="173" r="14"/><path d="M72 177L111 180L160 180L212 149L257 177M111 180L142 203L189 203M160 180L195 193L224 193M257 177H276M189 203H211"/></g>`,
+            `<g class="demo-figure demo-pose pose-b"><circle class="demo-head-dot" cx="57" cy="173" r="14"/><path d="M72 177L111 178L160 141L212 149L257 177M111 178L142 203L189 203M160 141L195 155L224 155M257 177H276M189 203H211"/></g>`
+          ],
+          march: [
+            `<g class="demo-figure demo-pose pose-a"><circle class="demo-head-dot" cx="180" cy="48" r="15"/><path d="M180 66V132M180 81L149 104L138 124M180 81L212 101L222 119M180 132L160 177L161 225M180 132L205 166L225 163L238 177M161 225L143 226M238 177L251 179"/></g>`,
+            `<g class="demo-figure demo-pose pose-b"><circle class="demo-head-dot" cx="180" cy="48" r="15"/><path d="M180 66V132M180 81L148 101L138 120M180 81L211 104L222 124M180 132L155 166L135 163L122 177M180 132L202 179L201 225M122 177L109 179M201 225L219 226"/></g>`
+          ],
+          stretch: [
+            `<g class="demo-figure demo-pose pose-a"><circle class="demo-head-dot" cx="180" cy="49" r="15"/><path d="M180 67V139M180 86L147 105L143 138M180 86L213 105L217 138M180 139L158 184L159 226M180 139L202 184L201 226M159 226L141 228M201 226L219 228"/></g>`,
+            `<g class="demo-figure demo-pose pose-b"><circle class="demo-head-dot" cx="180" cy="49" r="15"/><path d="M180 67V139M180 86L157 61L148 29M180 86L203 61L212 29M180 139L158 184L159 226M180 139L202 184L201 226M159 226L141 228M201 226L219 228"/></g>`
+          ],
+          plank: [
+            `<g class="demo-figure demo-pose pose-a"><circle class="demo-head-dot" cx="276" cy="119" r="14"/><path d="M260 126L202 132L148 139L95 146M202 132L220 162L253 162M148 139L118 168L84 172M95 146L71 169L48 172M253 162H272M48 172H30"/></g>`,
+            `<g class="demo-figure demo-pose pose-b"><circle class="demo-head-dot" cx="276" cy="119" r="14"/><path d="M260 126L202 132L148 139L95 146M202 132L220 162L253 162M148 139L118 168L84 172M95 146L71 169L48 172M253 162H272M48 172H30"/></g>`
+          ]
+        };
+        const poses = figures[key] || figures.stretch;
+        return `<svg class="demo-svg" viewBox="0 0 360 260" role="img" aria-label="动作分解动画"><circle class="demo-ring" cx="180" cy="143" r="102"/><path class="demo-floor" d="M40 229H320"/>${poses.join('')}</svg>`;
+      }
+      const demoTips = {
+        squat: ['脚掌稳稳贴地，膝盖大致朝脚尖方向。','向下坐髋，做到舒服的幅度就好。','起身时保持呼吸，不必追求蹲得很深。'],
+        pushup: ['选择稳固、适合自己的支撑高度。','下放与推起都慢一点，身体保持自然稳定。','如有不适，停下来或换更轻松的版本。'],
+        bridge: ['仰卧屈膝，脚掌踩稳。','呼气抬髋，到舒服的位置，不要过度反弓腰。','慢慢放下，保持自然呼吸。'],
+        plank: ['肩、髋、脚踝尽量保持自然直线。','腹部轻轻收紧，呼吸保持顺畅。','从短时间开始，出现不适就结束。'],
+        march: ['站稳后再交替抬脚，不需要跳。','放松肩膀，膝盖抬到舒服的高度。','用可以自然说话的节奏进行。'],
+        stretch: ['动作轻柔，拉伸感保持在舒服范围。','不要弹振或强行压到更深。','自然呼吸，左右两侧都留一点时间。'],
+        breath: ['找到舒服的姿势。','放松肩膀，让呼吸自然变慢。','不需要刻意憋气或追求固定节奏。']
+      };
+      function openDemo(index, fromExperience) {
+        currentDemoIndex = Math.max(0, Math.min(program.length - 1, index));
+        demoFromExperience = Boolean(fromExperience);
+        resumeAfterDemo = demoFromExperience && mode === 'workout' && !paused;
+        if (resumeAfterDemo) pauseTimer();
+        const item = program[currentDemoIndex]; const demoKey = getDemoKey(item); const supported = Boolean(getCoachKey(item));
+        $('#demo-heading').textContent = `${String(currentDemoIndex + 1).padStart(2,'0')} / ${item.role}`;
+        $('#demo-title').textContent = item.title;
+        $('#demo-role').textContent = `${item.role} · ${formatDuration(Number(item.duration) || 0)} · 示范动画`;
+        $('#demo-desc').textContent = item.desc || '跟着动画熟悉动作，再用适合自己的节奏完成。';
+        $('#demo-cues').innerHTML = (demoTips[demoKey] || demoTips.stretch).map((tip,i) => `<li><i>${String(i+1).padStart(2,'0')}</i><span>${esc(tip)}</span></li>`).join('');
+        $('#demo-stage').innerHTML = `${demoSvgFor(demoKey)}<span class="demo-stage-label">${esc(demoKey.toUpperCase())} · TAKE A LOOK</span>`;
+        const coachButton = $('#coach-launch'); coachButton.disabled = !supported; coachButton.textContent = supported ? '开启动作标准识别' : '摄像头识别暂未覆盖'; coachButton.classList.toggle('btn-primary', supported); coachButton.classList.toggle('btn-line', !supported);
+        $('#demo-fineprint').textContent = supported ? '识别会根据画面中的关节位置给出基础动作提示，不替代专业教练指导。' : '当前动作暂不支持摄像头识别；仍可使用动画示范和动作要点。';
+        setBackdrop($('#demo-backdrop'), true);
+      }
+      function closeDemo() {
+        setBackdrop($('#demo-backdrop'), false);
+        const shouldResume = resumeAfterDemo; resumeAfterDemo = false;
+        if (shouldResume && mode === 'workout' && $('#experience-backdrop').classList.contains('show')) resumeTimer();
+      }
+      $('#close-demo').addEventListener('click', closeDemo); $('#close-demo-secondary').addEventListener('click', closeDemo);
+      $('#demo-backdrop').addEventListener('click', e => { if (e.target === $('#demo-backdrop')) closeDemo(); });
+      $('#coach-launch').addEventListener('click', () => { if (getCoachKey(program[currentDemoIndex])) openCoach(); });
+
+      const coachTips = {
+        squat:'建议侧身入镜；观察下蹲与起身的关节活动幅度。膝盖方向等细节仍请自己留意。',
+        pushup:'请用侧面角度入镜；观察手臂屈伸节奏。斜板或墙面版本也可以。',
+        bridge:'请侧身躺在镜头内；观察抬髋与放下的幅度，腰部保持舒服。',
+        plank:'请侧身让肩、髋、脚踝进入画面；识别躯干是否接近自然直线。'
+      };
+      async function ensurePoseLandmarker() {
+        if (poseLandmarker) return poseLandmarker;
+        if (!poseModulePromise) {
+          poseModulePromise = (async () => {
+            const packageUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs';
+            const vision = await import(packageUrl);
+            const fileset = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm');
+            return vision.PoseLandmarker.createFromOptions(fileset, {
+              baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task' },
+              runningMode: 'VIDEO', numPoses: 1, minPoseDetectionConfidence: .55, minPosePresenceConfidence: .5, minTrackingConfidence: .5
+            });
+          })().catch(error => { poseModulePromise = null; throw error; });
+        }
+        poseLandmarker = await poseModulePromise; return poseLandmarker;
+      }
+      function coachMessage(message) { if (message === lastCoachFeedback) return; lastCoachFeedback = message; $('#coach-feedback').textContent = message; }
+      function averageAngle(landmarks, triplets) {
+        const angles = triplets.map(([a,b,c]) => {
+          const pts = [landmarks[a],landmarks[b],landmarks[c]];
+          if (pts.some(p => !p || (p.visibility ?? 1) < .42)) return null;
+          const [p1,p2,p3] = pts; const v1=[p1.x-p2.x,p1.y-p2.y], v2=[p3.x-p2.x,p3.y-p2.y];
+          const dot=v1[0]*v2[0]+v1[1]*v2[1]; const mag=Math.hypot(...v1)*Math.hypot(...v2);
+          return mag ? Math.acos(Math.max(-1,Math.min(1,dot/mag))) * 180 / Math.PI : null;
+        }).filter(value => value !== null);
+        return angles.length ? angles.reduce((a,b)=>a+b,0)/angles.length : null;
+      }
+      function drawPose(landmarks) {
+        const video=$('#coach-video'), canvas=$('#pose-canvas'), ctx=canvas.getContext('2d');
+        if (!video.videoWidth || !video.videoHeight) return;
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) { canvas.width=video.videoWidth; canvas.height=video.videoHeight; }
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const links=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,29],[28,30]];
+        ctx.lineWidth=Math.max(3,canvas.width/190); ctx.lineCap='round'; ctx.strokeStyle='rgba(240,189,112,.9)'; ctx.fillStyle='#ee7051';
+        for (const [a,b] of links) { const p=landmarks[a], q=landmarks[b]; if (p && q && (p.visibility??1)>.4 && (q.visibility??1)>.4) { ctx.beginPath(); ctx.moveTo(p.x*canvas.width,p.y*canvas.height); ctx.lineTo(q.x*canvas.width,q.y*canvas.height); ctx.stroke(); } }
+        for (const p of landmarks) if ((p.visibility??1)>.55) { ctx.beginPath(); ctx.arc(p.x*canvas.width,p.y*canvas.height,Math.max(3,canvas.width/150),0,Math.PI*2); ctx.fill(); }
+      }
+      function analyzePose(landmarks) {
+        if (!landmarks || landmarks.length < 29) { $('#camera-status').textContent='未识别到身体'; coachMessage('请让身体完整进入画面，稍微调整距离和光线。'); return; }
+        const ranges = {
+          squat:[[23,25,27],[24,26,28]], pushup:[[11,13,15],[12,14,16]], bridge:[[11,23,25],[12,24,26]], plank:[[11,23,27],[12,24,28]]
+        };
+        const angle=averageAngle(landmarks,ranges[currentCoachKey] || ranges.squat);
+        if (angle === null) { $('#camera-status').textContent='身体部分被遮挡'; coachMessage('关键关节还没看清；请调整镜头，让肩、髋和腿进入画面。'); return; }
+        $('#camera-status').textContent='已找到身体 · 实时提示';
+        if (currentCoachKey === 'plank') { $('#rep-label').textContent='姿势状态'; $('#rep-count').textContent=angle>155?'OK':'…'; coachMessage(angle>155?'姿势看起来稳定，保持自然呼吸。':'试着让肩、髋、脚踝回到自然直线；不要憋气。'); return; }
+        const down = currentCoachKey === 'squat' ? angle < 112 : angle < 102;
+        const up = angle > (currentCoachKey === 'squat' ? 153 : 155);
+        if (down) { coachPhase='down'; coachMessage(currentCoachKey==='squat'?'下蹲幅度已识别；做到舒服的范围就好。':'动作下放已识别，慢慢推起或抬髋。'); }
+        else if (up) { if (coachPhase==='down') { coachReps++; $('#rep-count').textContent=String(coachReps).padStart(2,'0'); } coachPhase='up'; coachMessage(coachReps ? '这一轮识别完成，呼吸顺畅再开始下一次。' : '动作准备位已识别，按自己的节奏开始。'); }
+        else { coachMessage(currentCoachKey==='squat'?'正在移动中；保持脚掌稳定，膝盖大致朝脚尖方向。':'正在移动中；放慢节奏，保持动作舒适。'); }
+      }
+      let lastVideoTime = -1; let lastPoseAt = 0;
+      function poseLoop() {
+        if (!cameraStream || !poseLandmarker) return;
+        const video=$('#coach-video');
+        if (video.readyState >= 2 && video.currentTime !== lastVideoTime && performance.now()-lastPoseAt > 75) {
+          try { const result=poseLandmarker.detectForVideo(video,performance.now()); const landmarks=result.landmarks?.[0] || result.poseLandmarks?.[0]; if (landmarks) { drawPose(landmarks); analyzePose(landmarks); } else { $('#camera-status').textContent='寻找身体中…'; coachMessage('请向后退一点，让动作和全身进入取景框。'); } lastVideoTime=video.currentTime; lastPoseAt=performance.now(); }
+          catch (error) { $('#camera-status').textContent='识别暂停'; coachMessage('识别暂时遇到问题，请暂停后重新开启。'); }
+        }
+        poseFrameId=requestAnimationFrame(poseLoop);
+      }
+      async function startCamera() {
+        const status=$('#camera-status'), placeholder=$('#camera-placeholder');
+        if (!navigator.mediaDevices?.getUserMedia) { status.textContent='当前环境不支持摄像头'; placeholder.innerHTML='<strong>请用安全页面打开摄像头</strong>浏览器需要 HTTPS 或 localhost 环境。动作演示仍可正常使用。'; return; }
+        $('#camera-start').disabled=true; status.textContent='等待摄像头授权'; placeholder.innerHTML='<strong>正在准备摄像头</strong>请在浏览器弹窗中允许访问摄像头。'; placeholder.hidden=false;
+        try {
+          cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+          const video=$('#coach-video'); video.srcObject=cameraStream; await video.play();
+          status.textContent='正在加载姿态模型'; placeholder.innerHTML='<strong>正在准备识别</strong>首次使用需要下载轻量姿态模型，稍等片刻。';
+          await ensurePoseLandmarker(); placeholder.hidden=true; coachPhase='up'; coachReps=0; lastCoachFeedback=''; $('#rep-count').textContent='00'; $('#rep-label').textContent=currentCoachKey==='plank'?'姿势状态':'动作次数'; $('#camera-stop').disabled=false; $('#camera-start').disabled=false; $('#camera-start').textContent='重新开启'; status.textContent='模型就绪 · 正在寻找身体'; coachMessage('模型已就绪，请调整到建议的镜头角度。'); lastVideoTime=-1; lastPoseAt=0; poseLoop();
+        } catch(error) {
+          stopCamera(); $('#camera-start').disabled=false; status.textContent='暂时无法开启';
+          const errorName=error?.name || ''; const isPermission=/NotAllowed|Permission|denied/i.test(`${errorName} ${error?.message || ''}`); const noCamera=errorName==='NotFoundError'; const busyCamera=errorName==='NotReadableError';
+          placeholder.hidden=false; placeholder.innerHTML=isPermission?'<strong>摄像头权限未开启</strong>请在浏览器地址栏的站点权限中允许摄像头，再点一次开启。':noCamera?'<strong>没有找到可用摄像头</strong>请连接摄像头后重试；动作动画和要点仍然可用。':busyCamera?'<strong>摄像头正在被其他应用使用</strong>关闭占用摄像头的应用后再试。':'<strong>识别服务未能连接</strong>检查网络后重试；动作动画和要点仍然可用。';
+          coachMessage(isPermission?'需要摄像头权限才能进行实时识别。':noCamera?'当前设备没有可用摄像头。':busyCamera?'请先关闭其他正在使用摄像头的应用。':'姿态模型未能加载，请检查网络后再试。');
+        }
+      }
+      function stopCamera() {
+        if (poseFrameId) cancelAnimationFrame(poseFrameId); poseFrameId=null;
+        if (cameraStream) cameraStream.getTracks().forEach(track=>track.stop()); cameraStream=null;
+        const video=$('#coach-video'); if (video) video.srcObject=null;
+        const canvas=$('#pose-canvas'); if (canvas) canvas.getContext('2d')?.clearRect(0,0,canvas.width,canvas.height);
+        if ($('#camera-stop')) $('#camera-stop').disabled=true;
+        if ($('#camera-start')) $('#camera-start').disabled=false;
+      }
+      function openCoach() {
+        const item=program[currentDemoIndex]; currentCoachKey=getCoachKey(item); if (!currentCoachKey) return;
+        resumeAfterCoach = mode === 'workout' && !paused;
+        if (resumeAfterCoach) pauseTimer();
+        $('#coach-heading').textContent=`${item.title} · 实时动作提示`; $('#coach-hint-list').textContent=coachTips[currentCoachKey];
+        $('#rep-label').textContent=currentCoachKey==='plank'?'姿势状态':'动作次数'; $('#rep-count').textContent=currentCoachKey==='plank'?'…':'00';
+        $('#camera-status').textContent='等待启动摄像头'; $('#camera-placeholder').hidden=false; $('#camera-placeholder').innerHTML='<strong>把自己放进聚光灯里</strong>请将手机或电脑固定好，尽量让身体完整进入画面。建议侧身站立，光线充足。';
+        lastCoachFeedback=''; coachMessage('点击下方按钮，授权摄像头并开始识别。'); setBackdrop($('#coach-backdrop'),true); startCamera();
+      }
+      function closeCoach() {
+        stopCamera(); setBackdrop($('#coach-backdrop'),false);
+        const shouldResume = resumeAfterCoach; resumeAfterCoach = false;
+        if (shouldResume && mode === 'workout' && $('#experience-backdrop').classList.contains('show')) resumeTimer();
+      }
+      $('#camera-start').addEventListener('click',startCamera); $('#camera-stop').addEventListener('click',()=>{stopCamera();$('#camera-status').textContent='已暂停 · 摄像头已关闭';$('#camera-placeholder').hidden=false;$('#camera-placeholder').innerHTML='<strong>摄像头已关闭</strong>你的画面不会继续被读取。准备好后可以重新开启。';coachMessage('识别已暂停。');});
+      $('#close-coach').addEventListener('click',closeCoach); $('#coach-backdrop').addEventListener('click',e=>{if(e.target===$('#coach-backdrop'))closeCoach();});
+
+      function progressMarkup() { return `<div class="experience-progress"><div class="progress-top"><span>${mode === 'preview' ? 'WALK-THROUGH' : 'TONIGHT · LIVE'}</span><span>${String(currentIndex + 1).padStart(2,'0')} / ${String(program.length).padStart(2,'0')}</span></div><div class="progress-track">${program.map((_,i) => `<span class="progress-segment ${i < currentIndex ? 'done' : ''} ${i === currentIndex ? 'current' : ''}"></span>`).join('')}</div></div>`; }
+      function experienceHeader() { return `<div class="experience-top"><span class="experience-brand"><i class="live-dot"></i>身体排练室 &nbsp; / &nbsp; ${mode === 'preview' ? '走台预览' : '正式开演'}</span><button class="exit-btn" id="exit-experience">${mode === 'preview' ? '退出预览 ×' : '结束训练 ×'}</button></div>`; }
+      function renderExperience() {
+        const host = $('#experience-content');
+        if (mode === 'summary') { renderSummary(); return; }
+        const item = program[currentIndex]; if (!item) return;
+        const upcoming = program[currentIndex + 1];
+        const preview = mode === 'preview';
+        const percent = preview ? 0 : Math.max(0, Math.min(100, (1 - remaining / Math.max(1,item.duration)) * 100));
+        const demoKey = getDemoKey(item);
+        const tips = demoTips[demoKey] || demoTips.stretch;
+        const coachSupported = Boolean(getCoachKey(item));
+        const liveDemo = `<section class="live-demo" aria-label="动作标准示范与动作提示"><div class="live-demo-head"><span>动作标准示范</span><small>循环演示 · 按自己的节奏练</small></div><div class="live-demo-layout"><div class="live-demo-figure">${demoSvgFor(demoKey)}</div><ol class="live-demo-cues">${tips.map((tip,i) => `<li><i>${String(i+1).padStart(2,'0')}</i><span>${esc(tip)}</span></li>`).join('')}</ol></div><div class="live-demo-foot"><span>${coachSupported ? '摄像头识别提供基础视觉提示' : '此动作暂不支持摄像头识别'}</span>${coachSupported ? '<button class="live-coach-button" id="experience-camera">开启摄像头识别 ↗</button>' : ''}</div></section>`;
+        host.innerHTML = `${experienceHeader()}<div class="experience-body"><div><div class="experience-label">${esc(item.role)} &nbsp; / &nbsp; ${preview ? '走台中' : paused ? '已暂停' : '正在进行'}</div><h1 class="experience-title">${esc(item.title)}</h1><p class="experience-desc">${esc(item.desc || '按自己的节奏完成这一幕。')}</p><span class="experience-move">${esc(item.cue || item.title)}</span>${liveDemo}</div><div class="clock-wrap"><div class="clock-ring" style="--progress:${percent}%"><div class="clock-inside"><div class="clock-time">${preview ? fmt(item.duration) : fmt(remaining)}</div><div class="clock-caption">${preview ? '这一幕的建议时长' : paused ? 'PAUSED' : 'TIME REMAINING'}</div></div></div>${preview ? '' : `<button class="clock-play" id="toggle-pause" aria-label="${paused ? '继续' : '暂停'}">${paused ? '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5v9l7-4.5-7-4.5Z"/></svg>' : '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 3h3v10H4zM9 3h3v10H9z"/></svg>'}</button>`}</div></div>${progressMarkup()}<div class="experience-bottom">${preview ? `<div class="preview-nav"><button class="btn btn-ghost btn-small" id="prev-step" ${currentIndex === 0 ? 'disabled' : ''}>← 上一幕</button><span>${upcoming ? `下一幕：${esc(upcoming.title)}` : '这是最后一幕'}</span><button class="btn btn-primary btn-small" id="next-step">${upcoming ? '下一幕 →' : '完成走台 ✓'}</button></div>` : `<button class="btn btn-ghost btn-small" id="skip-step">跳过这一幕 →</button>`}</div>`;
+        $('#exit-experience').addEventListener('click', () => preview ? closeExperience() : setBackdrop($('#confirm-backdrop'), true));
+        $('#experience-camera')?.addEventListener('click', () => { currentDemoIndex = currentIndex; openCoach(); });
+        if (preview) {
+          $('#prev-step')?.addEventListener('click', () => { currentIndex = Math.max(0,currentIndex-1); renderExperience(); });
+          $('#next-step').addEventListener('click', () => { if (currentIndex >= program.length - 1) { closeExperience(); showToast('走台完成，准备好就可以开演'); } else { currentIndex++; renderExperience(); } });
+        } else {
+          $('#toggle-pause').addEventListener('click', () => paused ? resumeTimer() : pauseTimer());
+          $('#skip-step').addEventListener('click', skipStep);
+        }
+      }
+      function renderSummary() {
+        const planned = totalSeconds();
+        const host = $('#experience-content');
+        host.innerHTML = `<div class="session-summary"><div class="summary-star">✳</div><div class="experience-label">CURTAIN CALL &nbsp; / &nbsp; 谢幕</div><h2>${completedCount >= program.length ? '漂亮谢幕。' : '下次见，主角。'}</h2><p class="summary-copy">${completedCount >= program.length ? '这场演出，顺利谢幕。谢谢你愿意为自己留出这一段时间。' : '今天已经完成的部分，也值得被好好记下来。'}</p><div class="summary-stats"><div class="summary-stat"><strong>${completedCount}/${program.length}</strong><span>完成环节</span></div><div class="summary-stat"><strong>${fmt(elapsedSeconds)}</strong><span>实际练习</span></div><div class="summary-stat"><strong>${fmt(planned)}</strong><span>节目时长</span></div></div><div class="summary-actions"><button class="btn btn-primary" id="again-button">再排一场</button><button class="btn btn-ghost" id="home-button">回到排练厅</button></div></div>`;
+        $('#again-button').addEventListener('click', () => startSession());
+        $('#home-button').addEventListener('click', closeExperience);
+      }
+      function startPreview() { clearInterval(timerId); mode = 'preview'; currentIndex = 0; setBackdrop($('#experience-backdrop'), true); renderExperience(); }
+      function startSession() { clearInterval(timerId); mode = 'workout'; currentIndex = 0; remaining = Number(program[0]?.duration) || 30; elapsedSeconds = 0; completedCount = 0; paused = false; setBackdrop($('#confirm-backdrop'), false); setBackdrop($('#experience-backdrop'), true); renderExperience(); startTimer(); }
+      function startTimer() {
+        clearInterval(timerId); if (paused || mode !== 'workout') return;
+        timerId = setInterval(() => {
+          if (remaining > 0) { remaining--; elapsedSeconds++; }
+          if (remaining <= 0) { completedCount++; if (currentIndex < program.length - 1) { currentIndex++; remaining = Number(program[currentIndex].duration) || 30; renderExperience(); } else { finishSession(); return; } }
+          else renderExperience();
+        }, 1000);
+      }
+      function pauseTimer() { paused = true; clearInterval(timerId); renderExperience(); }
+      function resumeTimer() { paused = false; renderExperience(); startTimer(); }
+      function skipStep() { clearInterval(timerId); if (currentIndex >= program.length - 1) { finishSession(); return; } currentIndex++; remaining = Number(program[currentIndex].duration) || 30; renderExperience(); startTimer(); }
+      function finishSession() { clearInterval(timerId); timerId = null; mode = 'summary'; renderSummary(); }
+      function closeExperience() { clearInterval(timerId); timerId = null; mode = null; setBackdrop($('#confirm-backdrop'), false); setBackdrop($('#experience-backdrop'), false); }
+      $('#start-button').addEventListener('click', startSession); $('#start-card').addEventListener('click', startSession);
+      $('#preview-button').addEventListener('click', startPreview); $('#preview-card').addEventListener('click', startPreview);
+      $('#continue-session').addEventListener('click', () => setBackdrop($('#confirm-backdrop'), false));
+      $('#confirm-end').addEventListener('click', () => { setBackdrop($('#confirm-backdrop'), false); finishSession(); });
+      $('#experience-backdrop').addEventListener('click', e => { if (e.target === $('#experience-backdrop')) { if (mode === 'preview' || mode === 'summary') closeExperience(); else setBackdrop($('#confirm-backdrop'), true); } });
+
+      $('#theme-trigger').addEventListener('click', () => { const menu = $('#theme-menu'); const open = menu.classList.toggle('open'); $('#theme-trigger').setAttribute('aria-expanded', String(open)); });
+      $$('.theme-option').forEach(btn => btn.addEventListener('click', () => { setTheme(btn.dataset.themeChoice); $('#theme-menu').classList.remove('open'); $('#theme-trigger').setAttribute('aria-expanded','false'); showToast(`已切换为「${themeNames[btn.dataset.themeChoice]}」`); }));
+      document.addEventListener('click', e => { if (!e.target.closest('.theme-select')) { $('#theme-menu').classList.remove('open'); $('#theme-trigger').setAttribute('aria-expanded','false'); } });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#theme-menu').classList.contains('open')) $('#theme-menu').classList.remove('open'); else if ($('#coach-backdrop').classList.contains('show')) closeCoach(); else if ($('#demo-backdrop').classList.contains('show')) closeDemo(); else if ($('#presets-backdrop').classList.contains('show')) setBackdrop($('#presets-backdrop'), false); else if ($('#editor-backdrop').classList.contains('show')) setBackdrop($('#editor-backdrop'), false); else if ($('#confirm-backdrop').classList.contains('show')) setBackdrop($('#confirm-backdrop'), false); else if ($('#experience-backdrop').classList.contains('show')) { if (mode === 'preview' || mode === 'summary') closeExperience(); else setBackdrop($('#confirm-backdrop'), true); } } });
+      setTheme(activeTheme in themeNames ? activeTheme : 'stage'); renderHome();
+    })();
+  </script>
+</body>
+</html>
+
